@@ -1,28 +1,44 @@
 # Driver Quality & Service Performance Analytics
 
-## Executive Summary
+## 1. Executive Summary
 
-This project evaluates ride-booking outcomes and service-performance patterns for a ride-hailing platform. The analysis focuses on completion rates, cancellations, incomplete rides, pickup locations, vehicle arrival time, vehicle types, time periods, and customer and driver ratings.
+This project analyzes ride-booking and service-performance data to identify operational issues affecting successful ride completion and customer experience. The analysis focuses on booking outcomes, driver and customer cancellations, incomplete rides, pickup locations, arrival times, vehicle types, time periods, and ratings.
 
-The dataset contains 150,000 bookings. Only 62.0% resulted in completed rides, while 38.0% were cancelled, incomplete, or had no driver found. Pickup location showed the clearest operational variation, while vehicle type and time of day showed relatively small differences.
+The dataset contains 150,000 bookings. The overall completion rate is 62.0%, meaning that 38.0% of bookings did not result in a completed ride. Pickup location shows the clearest variation in performance, while vehicle type and time of day show relatively small differences.
 
-## Data and Methodology
+## 2. Data Source
 
-The analysis uses the publicly available Uber India ride-bookings dataset from Kaggle:
+The original dataset was obtained from Kaggle:
 
 https://www.kaggle.com/datasets/anilrohan/uber-data-india?resource=download
 
-The notebook performs data validation, exploratory analysis, and feature engineering. Date and time fields were converted for temporal analysis. Missing values were retained when they were structurally related to booking status, such as ratings being unavailable for non-completed rides.
+The raw and derived CSV files are kept locally and are not included in the repository. The notebook recreates the prepared dataset from the original Kaggle file.
 
-The following features were created:
+## 3. Data Preparation
 
-- Month, day of week, hour, time period, and weekend indicator.
-- Completion, driver-cancellation, customer-cancellation, and incomplete-ride indicators.
-- Driver-rating, VTAT, CTAT, and distance bands.
+### Data Cleaning and Validation
 
-The prepared data was loaded into PostgreSQL in the `driver_quality` database and analyzed using SQL. Power BI can connect to the `uber_data_cleaned` table for dashboard development.
+The notebook performs the following checks before analysis:
 
-## Key Performance Metrics
+- Converts `Date` and `Time` into usable datetime fields.
+- Reviews missing values by booking status.
+- Checks row duplicates and repeated Booking IDs.
+- Validates booking statuses, cancellation reasons, and incomplete-ride reasons.
+- Checks numerical fields and rating ranges.
+
+Missing values were retained when they were structurally not applicable. For example, ratings are generally available for completed rides, while cancellation reasons apply only to the relevant cancellation status. No artificial values were imputed into these fields.
+
+### Feature Engineering
+
+The prepared dataset contains the original booking fields plus operational features used for SQL analysis and Power BI reporting:
+
+- Temporal features: `Month`, `Day_of_Week`, `Hour`, `Time_Period`, and `Is_Weekend`.
+- Outcome indicators: `Is_Completed`, `Is_Driver_Cancelled`, `Is_Customer_Cancelled`, and `Is_Incomplete`.
+- Segmentation fields: `Driver_Rating_Band`, `VTAT_Band`, `CTAT_Band`, and `Distance_Band`.
+
+## 4. Exploratory Data Analysis
+
+EDA was used to understand booking outcomes, cancellations, locations, time patterns, ratings, service times, and booking values. The main descriptive results were then loaded into PostgreSQL for repeatable SQL analysis.
 
 | Metric | Result |
 | --- | ---: |
@@ -36,95 +52,79 @@ The prepared data was loaded into PostgreSQL in the `driver_quality` database an
 | No driver found | 10,500 |
 | Pickup locations | 176 |
 
-## Key Findings
+## 5. PostgreSQL and SQL Analysis
 
-### Booking Outcomes
+The feature-engineered data was loaded into PostgreSQL database `driver_quality` in the table `uber_data_cleaned`. SQL queries were used to calculate booking outcome distributions, cancellation rates, location rankings, VTAT patterns, vehicle-type performance, time-based performance, ratings, and operational focus areas.
 
-Driver cancellation was the largest individual non-completion category, accounting for 18.0% of all bookings. The results indicate a significant service-performance gap because more than one-third of bookings did not become completed rides.
+This database layer provides a consistent source for the Power BI dashboard and allows the business questions to be answered using repeatable queries rather than manual calculations.
 
-### Pickup Location
+## 6. Business Questions and Answers
 
-Pickup location showed the largest operational variation. Non-completion rates ranged from:
+### Q1. What is the overall health of the booking operation?
 
-- **45.32%** at Vinobapuri
-- **43.86%** at Akshardham
-- **33.73%** at Welcome
+**Answer:** 93,000 of 150,000 bookings were completed, giving a 62.0% completion rate. The remaining 38.0% were cancelled, incomplete, or had no driver found. Driver cancellations were the largest individual non-completion category at 18.0%.
 
-The difference between the highest and lowest observed locations was approximately 11.6 percentage points. These locations should be treated as priority areas for operational investigation.
+### Q2. Where are service-performance issues more prevalent?
 
-### Driver Cancellations
+**Answer:** Pickup locations show meaningful differences. Vinobapuri had the highest observed non-completion rate at 45.32%, followed by Akshardham at 43.86%. Welcome had the lowest observed rate at 33.73%. This is a difference of approximately 11.6 percentage points.
 
-Driver cancellation reasons were relatively evenly distributed:
+### Q3. What is driving driver cancellations?
 
-| Reason | Share of driver cancellations |
-| --- | ---: |
-| Customer related issue | 25.32% |
-| Customer coughing or sick | 25.00% |
-| Personal or car-related issues | 24.91% |
-| More than permitted passengers | 24.76% |
+**Answer:** No single driver-cancellation reason dominates. Customer-related issues represented 25.32%, coughing or sickness 25.00%, personal or car-related issues 24.91%, and more than permitted passengers 24.76% of driver cancellations.
 
-No single reason dominated the driver-cancellation data.
+### Q4. Is pickup or service time associated with customer cancellations?
 
-### Vehicle Arrival Time
+**Answer:** Customer cancellation rates increase across the VTAT bands: Fast 0.11%, Moderate 5.86%, Slow 7.68%, and Very Slow 100.00%. The Very Slow result is unusually deterministic, so it should be treated as an observed association in this dataset rather than proof of causation.
 
-Customer cancellation increased across the VTAT bands:
+### Q5. Are there meaningful differences between vehicle types?
 
-| VTAT band | Customer cancellation rate |
-| --- | ---: |
-| Fast | 0.11% |
-| Moderate | 5.86% |
-| Slow | 7.68% |
-| Very Slow | 100.00% |
+**Answer:** Vehicle-type performance is relatively consistent. Completion rates range from 61.44% to 62.55%, and average VTAT ranges from 8.40 to 8.58. Vehicle type is therefore more useful as a dashboard filter than as a major explanation of performance differences.
 
-The Very Slow result is unusually deterministic and should be interpreted as an observed pattern in this dataset, not proof of causation.
+### Q6. Are there meaningful time-based operational patterns?
 
-### Vehicle Type and Time Period
+**Answer:** Broad time-period performance is stable. Completion rates range from 61.73% to 62.44%, while hourly completion rates range from approximately 60.88% to 63.70%. Time-based analysis is useful for monitoring, but it does not show a major operational difference in this dataset.
 
-Vehicle-type completion rates ranged from 61.44% to 62.55%, showing limited variation. Completion rates across broad time periods ranged from 61.73% to 62.44%. These fields are therefore most useful as dashboard filters and monitoring dimensions rather than primary explanations of performance.
+### Q7. What does service quality look like from ratings?
 
-### Ratings
+**Answer:** Among completed rides, the average driver rating is 4.23 and the average customer rating is 4.40. The driver-customer rating correlation is -0.001, indicating essentially no linear relationship. The two ratings should therefore be monitored separately.
 
-Among completed rides:
+### Q8. Where should operations focus attention?
 
-- Average driver rating: **4.23**
-- Average customer rating: **4.40**
-- Driver-customer rating correlation: **-0.001**
+**Answer:** Operations should begin with pickup locations that combine high non-completion and cancellation rates, particularly Vinobapuri and Akshardham. These should be treated as priority areas for further investigation into driver availability, pickup conditions, and customer behaviour.
 
-The near-zero correlation indicates that driver and customer ratings should be monitored as separate service-quality measures.
+## 7. Power BI Dashboard Design
 
-## Business Recommendations
+The Power BI dashboard should present the SQL results through a small set of operational views:
 
-1. Prioritize high non-completion locations, beginning with Vinobapuri and Akshardham.
-2. Monitor driver cancellations by location and cancellation reason rather than focusing on one reason alone.
-3. Track VTAT and customer cancellation together to identify service areas with long expected wait times.
-4. Use vehicle type and time period as dashboard filters for operational monitoring.
-5. Track driver and customer ratings separately for completed rides.
-6. Use additional operational data to investigate the causes behind location-level differences.
-
-## Power BI Dashboard Scope
-
-The dashboard should include:
-
-- Booking outcome and completion KPIs.
-- Cancellation and incomplete-ride breakdowns.
-- Pickup-location performance ranking or map.
-- VTAT band versus customer cancellation.
-- Driver-cancellation reasons.
+- KPI cards for total bookings, completion rate, non-completion rate, and cancellations.
+- Booking outcome distribution by status.
+- Pickup-location ranking for completion and non-completion rates.
+- Driver-cancellation reasons and location comparison.
+- VTAT band versus customer cancellation rate.
 - Vehicle-type and time-period comparisons.
-- Driver and customer rating KPIs.
+- Driver and customer rating indicators.
 
-The business questions and final visual interpretations belong in the report and dashboard, while the notebook documents the technical preparation and SQL analysis.
+Recommended slicers include date, pickup location, vehicle type, booking status, VTAT band, and time period. The dashboard should help users identify where performance is weakest and compare those segments with the overall baseline.
 
-## Limitations
+## 8. Recommendations
 
-- The dataset does not contain a unique driver identifier, so individual driver performance cannot be evaluated.
-- Many missing values are structurally related to booking status and should not be treated as random missing data.
-- Some category distributions and relationships appear highly structured or synthetic.
+1. Prioritize high non-completion pickup locations for operational investigation.
+2. Monitor driver cancellations by both location and reason.
+3. Track VTAT alongside customer cancellations to identify long-wait service segments.
+4. Use vehicle type and time period as monitoring and filtering dimensions.
+5. Track driver and customer ratings as separate service-quality measures.
+6. Add driver-level, supply, weather, traffic, and pickup-condition data in future analysis to investigate causes more directly.
+
+## 9. Limitations
+
+- The dataset has no unique driver identifier, so individual driver performance cannot be measured.
+- Many missing values are structurally related to booking status rather than random missing data.
+- Some distributions and relationships appear highly structured or synthetic.
 - The analysis identifies associations, not causal relationships.
-- The findings should be validated with additional operational data before business decisions are made.
+- Findings should be validated with additional operational data before business decisions are made.
 
-## Conclusion
+## 10. Conclusion
 
-The main opportunity identified is improving booking completion, particularly in pickup locations with high non-completion rates. Driver cancellations are the largest individual source of non-completion, while VTAT is strongly associated with customer cancellation in the dataset. Vehicle type and time of day show comparatively limited variation.
+The analysis identifies booking non-completion as the main performance issue. Driver cancellations are the largest individual contributor, and pickup location shows the strongest operational variation. VTAT is strongly associated with customer cancellation, while vehicle type and time of day show limited differences.
 
-The proposed PostgreSQL and Power BI workflow provides an operational view for monitoring these patterns and prioritizing further investigation.
+The combined EDA, feature-engineering, PostgreSQL, SQL, and Power BI workflow provides a practical structure for monitoring ride-service performance and prioritizing operational improvement.
