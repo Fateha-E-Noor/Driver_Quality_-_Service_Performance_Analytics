@@ -1,0 +1,12 @@
+# Local Python environments and caches
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Source and generated datasets are downloaded/generated locally
+ncr_ride_bookings.csv
+uber_data_cleaned.csv
+
+# Local secrets and environment files
+.env
+*.local
