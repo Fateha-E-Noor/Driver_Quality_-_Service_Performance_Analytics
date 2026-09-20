@@ -49,24 +49,37 @@ The notebook then runs SQL analysis for booking health, pickup-location performa
 
 The PostgreSQL password is not stored in the notebook. Set `PGPASSWORD` in the environment or enter the password when the database-loading cell prompts for it. Optional connection variables are `PGUSER`, `PGPORT`, and `PGDATABASE`.
 
-## Power BI Dashboard and Report
+## SQL Analysis
 
-The Power BI dashboard and business-question answers should be delivered as a separate report or dashboard file. The README documents the project and reproducibility steps; the report should present the final findings, visuals, interpretations, and recommendations.
+`questions.sql` contains the PostgreSQL queries used to answer the eight business questions. The queries expect the feature-engineered table `uber_data_cleaned` in the `driver_quality` database.
 
-Recommended report sections:
+## Power BI Dashboard and Final Report
 
-1. Executive summary
-2. Data source and methodology
-3. Data preparation and feature engineering
-4. PostgreSQL data model and SQL analysis
-5. Power BI dashboard pages and key visuals
-6. Answers to the business questions
-7. Operational recommendations
-8. Limitations and next steps
+The final deliverables are:
+
+- A Power BI dashboard connected to the PostgreSQL table `uber_data_cleaned`.
+- A PDF report containing the methodology, key findings, answers to the eight business questions, dashboard screenshots, recommendations, and limitations.
+
+The local `report.md` file is the editable source for the final PDF and is intentionally not tracked in GitHub. After editing it, export it to:
+
+`Driver_Quality_Service_Performance_Analytics_Report.pdf`
+
+Recommended conversion options:
+
+- In VS Code, open `report.md`, use Markdown preview, and choose **Print** followed by **Save as PDF**.
+- With Pandoc installed, run:
+
+```bash
+pandoc report.md -o Driver_Quality_Service_Performance_Analytics_Report.pdf
+```
+
+Upload the finished PDF to the repository. Keep `report.md` local as the editable source.
 
 ## Project File
 
 - `driver_quality_&_service_performance_analytics.ipynb`: EDA, feature engineering, PostgreSQL loading, and SQL analysis.
+- `questions.sql`: SQL queries used for the eight business questions.
+- `Driver_Quality_Service_Performance_Analytics_Report.pdf`: final presentation report.
 
 The raw and generated CSV files are excluded from version control. Download the source data from Kaggle and regenerate the derived data locally when needed.
 
@@ -90,4 +103,6 @@ Start PostgreSQL, create the `driver_quality` database, download the Kaggle CSV,
 4. Start PostgreSQL and create the `driver_quality` database.
 5. Select the configured Jupyter kernel in VS Code.
 6. Run the notebook from top to bottom.
-7. Connect Power BI to the PostgreSQL table `uber_data_cleaned` and build the report from the SQL outputs.
+7. Run `questions.sql` in PostgreSQL/pgAdmin 4.
+8. Connect Power BI to `uber_data_cleaned` and create the dashboard.
+9. Export the local `report.md` to PDF and upload the PDF as the final report.

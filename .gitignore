@@ -10,3 +10,6 @@ uber_data_cleaned.csv
 # Local secrets and environment files
 .env
 *.local
+
+# Editable report source; publish the exported PDF instead
+report.md
