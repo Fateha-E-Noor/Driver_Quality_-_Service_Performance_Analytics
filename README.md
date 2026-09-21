@@ -55,10 +55,10 @@ The PostgreSQL password is not stored in the notebook. Set `PGPASSWORD` in the e
 
 ## Power BI Dashboard and Final Report
 
-The final deliverables are:
+The repository includes the completed project deliverables:
 
-- A Power BI dashboard connected to the PostgreSQL table `uber_data_cleaned`.
-- A PDF report containing the methodology, key findings, answers to the eight business questions, dashboard screenshots, recommendations, and limitations.
+- `Driver Quality & Service Performance Dashboard.pbix`: Power BI dashboard connected to the PostgreSQL table `uber_data_cleaned`.
+- `Driver_Quality_Service_Performance_Analytics_Report.pdf`: final report containing the methodology, key findings, answers to the eight business questions, dashboard discussion, recommendations, and limitations.
 
 The local `report.md` file is the editable source for the final PDF and is intentionally not tracked in GitHub. After editing it, export it to:
 
@@ -73,12 +73,13 @@ Recommended conversion options:
 pandoc report.md -o Driver_Quality_Service_Performance_Analytics_Report.pdf
 ```
 
-Upload the finished PDF to the repository. Keep `report.md` local as the editable source.
+The PDF is the published report. Keep `report.md` local as the editable source for future revisions.
 
 ## Project File
 
 - `driver_quality_&_service_performance_analytics.ipynb`: EDA, feature engineering, PostgreSQL loading, and SQL analysis.
 - `questions.sql`: SQL queries used for the eight business questions.
+- `Driver Quality & Service Performance Dashboard.pbix`: Power BI dashboard.
 - `Driver_Quality_Service_Performance_Analytics_Report.pdf`: final presentation report.
 
 The raw and generated CSV files are excluded from version control. Download the source data from Kaggle and regenerate the derived data locally when needed.
@@ -104,5 +105,5 @@ Start PostgreSQL, create the `driver_quality` database, download the Kaggle CSV,
 5. Select the configured Jupyter kernel in VS Code.
 6. Run the notebook from top to bottom.
 7. Run `questions.sql` in PostgreSQL/pgAdmin 4.
-8. Connect Power BI to `uber_data_cleaned` and create the dashboard.
-9. Export the local `report.md` to PDF and upload the PDF as the final report.
+8. Open `Driver Quality & Service Performance Dashboard.pbix` in Power BI Desktop to review the dashboard.
+9. Use `Driver_Quality_Service_Performance_Analytics_Report.pdf` as the final report.
